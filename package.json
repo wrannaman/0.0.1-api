@@ -1,0 +1,18 @@
+{
+  "name": "wrannaman",
+  "version": "0.0.1",
+  "description": "wrannaman",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "AP",
+  "license": "PRIVATE",
+  "dependencies": {
+    "express": "^4.14.1",
+    "max4node": "^0.1.2",
+    "node-osc": "^2.0.4",
+    "socket.io": "^1.7.2"
+  }
+}
