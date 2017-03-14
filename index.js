@@ -13,7 +13,7 @@ websocket.on('connection', (socket) => {
   console.log('A client just joined on', socket.id);
 
   socket.on('drum kit', function(msg){
-    console.log('msg');
+    console.log('msg', msg);
     ctrl.drum.handle(msg);
   });
 

@@ -32,18 +32,18 @@ var client = new osc.Client('127.0.0.1', 7005);
 //   client.send('int',56, function () {
 //     //console.log('sent 2 ');
 //   });
-//   client.send('int', 0, function () {
-//     console.log('sent 2 ');
-//   });
-//   client.send('int',62, function () {
-//     console.log('sent 3 \n');
-//   });
-//   client.send('100',"", function () {
-//     console.log('sent');
-//   });
-//   client.send('0','', function () {
-//     console.log('sent');
-//   });
+//   // client.send('int', 0, function () {
+//   //   console.log('sent 2 ');
+//   // });
+//   // client.send('int',62, function () {
+//   //   console.log('sent 3 \n');
+//   // });
+//   // client.send('100',"", function () {
+//   //   console.log('sent');
+//   // });
+//   // client.send('0','', function () {
+//   //   console.log('sent');
+//   // });
 //
 //   setTimeout(function(){
 //     console.log('stopped');
@@ -126,81 +126,55 @@ max.get({
   console.log(wut + ' is ' + val);
 });
 
-
-
-let in_progress = false;
-
 const DrumCtrl = {
   handle: (drum_obj) => {
-    console.log('drum obj', drum_obj);
-    // console.log('drum 0 : ', drum_obj["0"]);
-    // console.log('drum 1 : ', drum_obj["1"]);
-    // console.log('drum 2 : ', drum_obj["2"]);
-    if (drum_obj["0"] >= .9)
+    if (drum_obj["drum"] === 3)
     {
-      if ( in_progress ) return;
-      in_progress = true;
-
-      console.log('send');
-      client.send('int',144, function () {
-        //console.log('sent 1 ');
-      });
-      client.send('int',84, function () {
-        //console.log('sent 2 ');
-      });
-      client.send('int',56, function () {
-        //console.log('sent 2 ');
-      });
-
+      client.send('int',144, function () {});
+      client.send('int',84, function () {});
+      client.send('int',56, function () {});
       setTimeout(()=>{
         in_progress = false;
-        client.send('int',128, function () {
-          //console.log('close- sent 1');
-        });
-        client.send('int',84, function () {
-          //console.log('close- sent 2');
-        });
-        client.send('int',64, function () {
-          //console.log('close- sent 2');
-        });
-      },200)
-      //console.log('firing!\n');
-      // max.call({
-      //   path: 'live_set tracks 0 clip_slots 0 clip',
-      //   method: 'fire'
-      // });
-
-      // client.send('int',64, function () {
-      //   console.log('sent 1 ');
-      // });
-      // client.send('int',81, function () {
-      //   console.log('sent 2 ');
-      // });
-      //
-      // setTimeout(()=>{
-      //   client.send('int',64, function () {
-      //     console.log('close- sent 1');
-      //   });
-      //   client.send('int',0, function () {
-      //     console.log('close- sent 2');
-      //   });
-      //
-      // },100)
-
-
+        client.send('int',128, function () {});
+        client.send('int',84, function () {});
+        client.send('int',64, function () {});
+      },100)
     }
-
-    if (drum_obj["1"] >= .9)
+    else if (drum_obj["drum"] === 2)
     {
-
-
-      //console.log('stopping');
-      // max.call({
-      //   path: 'live_set tracks 0 clip_slots 0 clip',
-      //   method: 'stop'
-      // });
-
-
+      client.send('int',144, function () {});
+      client.send('int',83, function () {});
+      client.send('int',56, function () {});
+      setTimeout(()=>{
+        in_progress = false;
+        client.send('int',128, function () {});
+        client.send('int',83, function () {});
+        client.send('int',64, function () {});
+      },100)
+    }
+    else if (drum_obj["drum"] === 1)
+    {
+      client.send('int',144, function () {});
+      client.send('int',82, function () {});
+      client.send('int',56, function () {});
+      setTimeout(()=>{
+        in_progress = false;
+        client.send('int',128, function () {});
+        client.send('int',82, function () {});
+        client.send('int',64, function () {});
+      },100)
+    }
+    else if (drum_obj["drum"] === 0)
+    {
+      client.send('int',144, function () {});
+      client.send('int',80, function () {});
+      client.send('int',56, function () {});
+      setTimeout(()=>{
+        in_progress = false;
+        client.send('int',128, function () {});
+        client.send('int',80, function () {});
+        client.send('int',64, function () {});
+      },100)
     }
   }
 }
