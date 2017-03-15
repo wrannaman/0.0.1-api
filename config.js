@@ -1,6 +1,7 @@
+/* eslint-disable */
 module.exports = {
   port: 8888,
-  falcon: function(){
+  falcon: () => {
     console.log('==========================================');
     console.log("                  .--.");
     console.log("                 /   o\\_");
@@ -13,7 +14,7 @@ module.exports = {
     console.log("                  /A A\\");
     console.log("                 /     \\");
     console.log('                 `"==="`');
-    console.log(`WRANNAMAN  on ${this.port}.`); 
+    console.log(`WRANNAMAN  on ${this.port}.`);
     console.log('==========================================');
   }
 }
