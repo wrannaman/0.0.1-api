@@ -1,8 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import io from 'socket.io-client';
-import Recharts, {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
-
+import Recharts, { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, RadialBarChart, RadialBar } from 'recharts';
+import { Circle } from 'rc-progress';
 const styles = require('../styles');
+
 const socket = io("localhost:8888", { transports: ['websocket', 'polling'] }); // eslint-disable-line
 
 const getPath = (x, y, width, height) => {
@@ -12,11 +13,32 @@ const getPath = (x, y, width, height) => {
           Z`;
 };
 
+const RED = "rgba(254, 48, 48, 0.8)";
+const YELLOW = "rgba(243, 255, 2, 0.8)";
+const GREEN = "rgba(58, 255, 58, .8)";
+const BLUE = "rgba(60, 59, 255, .8)";
+
 const TriangleBar = (props) => {
-  const { fill, x, y, width, height } = props;
+  let fill = props.fill
+  switch (props.name.toLowerCase()) {
+    case "red":
+      fill = RED;
+      break;
+    case "yellow":
+      fill = YELLOW;
+      break;
+    case "green":
+      fill = GREEN;
+      break;
+    case "blue":
+      fill = BLUE;
+      break;
+    default:
+
+  }
+  const { x, y, width, height } = props;
   return <path d={getPath(x, y, width, height)} stroke="none" fill={fill} />;
 };
-
 TriangleBar.propTypes = {
   fill: PropTypes.string,
   x: PropTypes.number,
@@ -24,7 +46,6 @@ TriangleBar.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
 };
-
 const keys = {
   FOOT: 4,
   GREEN: 3,
@@ -35,52 +56,76 @@ const keys = {
   1: "YELLOW",
   2: "BLUE",
   3: "GREEN",
-}
-
+};
+const style = {
+  top: 0,
+  left: 350,
+  lineHeight: '24px'
+};
 export default class Counter extends Component {
   constructor(props) {
     super(props);
     this.initSocketListeners = ::this.initSocketListeners;
     this.state = {
-      data: [
-        { name: 'Red', key: 0, total: 0, count: 0 },
-        { name: 'Yellow', key: 1, total: 0, count: 0 },
-        { name: 'Blue', key: 2, total: 0, count: 0 },
-        { name: 'Green', key: 3, total: 0, count: 0 },
-      ]
+      barData: [
+        { name: 'Red', key: 0, total: 52, count: 0, percent: 0, fill: RED },
+        { name: 'Yellow', key: 1, total: 205, count: 0, percent: 0, fill: YELLOW },
+        { name: 'Blue', key: 2, total: 102, count: 0, percent: 0, fill: BLUE },
+        { name: 'Green', key: 3, total: 30, count: 0, percent: 0, fill: GREEN },
+      ],
     };
   }
-  componentDidMount(){
-    this.initSocketListeners()
+  componentDidMount() {
+    this.initSocketListeners();
   }
   initSocketListeners() {
     const that = this;
     socket.on('connect', () => {
-      console.log('connected');
+      console.error('connected');
     });
     socket.on('totalCounts', (song) => {
-      const data = that.state.data;
-      for (const color in song) { // eslint-disable-line
-        data[color].total = song[color].notes.length;
-      }
-      that.setState({ data });
+      // const barData = that.state.barData;
+      // for (const color in song) { // eslint-disable-line
+      //   barData[color].total = song[color].notes.length;
+      // }
+      // that.setState({ barData });
     });
     socket.on('hit', (hit) => {
-      const data = that.state.data;
-      ++data[hit.hit].count;
-      that.setState({ data });
-    })
+      const barData = that.state.barData;
+      ++barData[hit.hit].count;
+      barData[hit.hit].percent = Math.ceil((barData[hit.hit].count / barData[hit.hit].total) * 100);
+      that.setState({ barData });
+    });
   }
   render() {
     return (
       <div style={styles.counterWrapper}>
-        <h1>Counter</h1>
-        <BarChart width={600} height={300} data={this.state.data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} >
+        <h1 style={{ fontSize: '150%', textAlign: 'center', paddingTop: 60, marginBottom: 25 }}></h1>
+        <BarChart width={900} height={600} data={this.state.barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} style={{ margin: '0 auto' }}>
           <XAxis dataKey="name" />
           <YAxis />
           <CartesianGrid strokeDasharray="3 3" />
-          <Bar dataKey="count" fill="#8884d8" shape={<TriangleBar />} label />
+          <Bar dataKey="count" fill="#f90679" shape={<TriangleBar />} label />
         </BarChart>
+        <div>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', minHeight: 200, }}>
+            { this.state.barData.map((d, i) => {
+              return (
+                <div style={{ position: 'relative' }}>
+                  <Circle
+                    key={i} // eslint-disable-line
+                    percent={d.percent > 100 ? 100 : d.percent}
+                    strokeWidth="4"
+                    strokeColor={d.fill}
+                    style={{ width: 100, height: 100, padding: 10 }}
+                  />
+                <h1 style={{ color: d.fill, position: 'absolute', top: 42, left: 0, width: 120, height: 120, textAlign: 'center', fontSize: '200%' }}> {d.percent > 100 ? 100 : d.percent} </h1>
+                </div>
+              );
+            })}
+
+          </div>
+        </div>
       </div>
     );
   }
