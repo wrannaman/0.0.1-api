@@ -33,6 +33,7 @@ const song = {
       genNote(320, 400, 72), // drum shuffle
       genNote(338.1, 400, 73),
     ]
-  }
+  },
+  start: 159
 };
 module.exports = song;

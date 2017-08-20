@@ -23,7 +23,7 @@ app.get('*', (req, res) => {
 });
 // The event will be called when a client is connected.
 websocket.on('connection', (socket) => {
-  console.log('connection');
+  console.log('connection', socket.id);
   // console.log('A client just joined on', socket.conn.server.transports);
   socket.on('dk', (msg, cb) => {
     // console.log('msg', msg);
@@ -38,8 +38,7 @@ websocket.on('connection', (socket) => {
     ctrl.leap.handle(msg);
   });
 
-  websocket.emit('totalCounts', song)
-
+  websocket.emit('totalCounts', song);
 });
 
 // const dgram = require('dgram');

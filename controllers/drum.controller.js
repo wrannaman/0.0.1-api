@@ -13,6 +13,14 @@ const fire = (n) => {
   }, 50);
 };
 
+const resetInterval = setInterval(() => {
+  if (global.MAX_TIME < song.start) {
+    for (const key in song) {
+      if (song[key].index) song[key].index = 0;
+    }
+  }
+}, 1000);
+
 const DrumCtrl = {
   handle: (drumObj) => {
     const idx = song[drumObj.d].index;
