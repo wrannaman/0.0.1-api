@@ -27,7 +27,7 @@ const song = {
   0: { // RED
     index: 0,
     notes: [
-      genNote(170, 207, 76, 90 ),
+      genNote(170, 207, 76, 90),
       genNote(208, 272, 80),
       genNote(272, 320, 73),
       genNote(320, 400, 72), // drum shuffle

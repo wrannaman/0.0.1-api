@@ -1,8 +1,15 @@
-# mothership
+# Mothership
+
+The goal is to have all communication point to or read from the Mothership
+
+this hid repo fires socket events TO mothership, clients subscribe to mothership events. 
+
+# Docs
 docs https://docs.cycling74.com/max6/dynamic/c74_docs.html#live_object_model
 notes https://docs.cycling74.com/max7/
 or https://docs.cycling74.com/max7/vignettes/live_object_model
 
+# Checkout scribbletune
 
 
 ## Example Max Calls

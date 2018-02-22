@@ -36,9 +36,9 @@ export default class Grid extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      boxWidth: 1000,
-      boxHeight: 1000,
-      X: 500,
+      width: 1000,
+      height: 1000,
+      Z: 500,
       Y: 500,
       scale: 4,
     };
@@ -47,29 +47,23 @@ export default class Grid extends Component {
     this.renderSquares = ::this.renderSquares;
   }
   componentDidMount() {
-    // this.initSocketListeners();
-    Leap.loop((frame) => {
-      if (frame.valid) {
-        try {
-          const SCALE = this.state.scale;
-          const width = frame.interactionBox.width * SCALE;
-          const height = frame.interactionBox.height * SCALE;
-          const centerWidth = width / 2;
-          const centerHeight = height / 2;
-          if (this.state.width !== width && this.state.height !== height && this.state.centerWidth !== centerWidth && this.state.centerHeight !== centerHeight) {
-            this.setState({ width, height, centerWidth, centerHeight });
-          }
-          // see https://developer.leapmotion.com/documentation/javascript/devguide/Leap_Coordinate_Mapping.html
-          const X = ((frame.hands[0].palmPosition[2] * SCALE) + centerWidth); // actually is Z
-          const Y = ((frame.hands[0].palmPosition[0] * SCALE) + centerHeight);
+    socket.on('connect', () => {
+      console.warn('point cloud connected');
+    });
+    socket.on('coords', (coords) => {
+      const SCALE = this.state.scale;
+      const width = coords.width * SCALE;
+      const height = coords.height * SCALE;
+      const centerWidth = width / 2;
+      const centerHeight = height / 2;
 
-          const xPercent = X / width;
-          const yPercent = Y / height;
-          this.setState({ X, Y, gridIndex: whichGrid(xPercent, yPercent) });
-        } catch (e) {
-          // ignore
-        }
+      if (this.state.width !== width && this.state.height !== height && this.state.centerWidth !== centerWidth && this.state.centerHeight !== centerHeight) {
+        this.setState({ width, height, centerWidth, centerHeight });
       }
+      // see https://developer.leapmotion.com/documentation/javascript/devguide/Leap_Coordinate_Mapping.html
+      const Z = ((coords.z * width)); // actually is Z
+      const Y = ((coords.y * height));
+      this.setState({ Z, Y, gridIndex: whichGrid(coords.z, coords.y) });
     });
   }
   renderSquares() {
@@ -84,8 +78,8 @@ export default class Grid extends Component {
         const color = getColor();
 
         squares.push(
-          <div style={{ position: 'absolute', width, height, top, left, border: `1px solid ${color}`, background: this.state.gridIndex === num ? color : '' }}>
-            <p style={{ color, textAlign: 'center', paddingTop: '48%' }}>{num}</p>
+          <div key={`${i}-${j}`} style={{ position: 'absolute', width, height, top, left, border: `1px solid ${color}`, padding: 1, background: this.state.gridIndex === num ? color : '' }}>
+            <p style={{ color: this.state.gridIndex === num ? 'black' : color, textAlign: 'center', paddingTop: '48%' }}>{num}</p>
           </div>
         );
         ++num; // eslint-disable-line
@@ -95,13 +89,13 @@ export default class Grid extends Component {
   }
   render() {
     return (
-      <div >
+      <div style={{ backgroundColor: 'black' }}>
         <h1 style={{ fontSize: '150%', textAlign: 'center', paddingTop: 60, marginBottom: 25 }}> GRID </h1>
         <div style={{ position: 'relative', width: this.state.width, margin: '0 auto' }}>
           <div style={{ position: 'absolute', width: this.state.width, height: this.state.height, backgroundColor: 'black', zIndex: 0 }}>
             {this.renderSquares()}
           </div>
-          <div style={{ position: 'absolute', width: 5, height: 5, backgroundColor: 'red', zIndex: 1, top: this.state.X, left: this.state.Y }} />
+          <div style={{ position: 'absolute', width: 5, height: 5, backgroundColor: 'red', zIndex: 1, top: this.state.Z, left: this.state.Y }} />
         </div>
       </div>
     );

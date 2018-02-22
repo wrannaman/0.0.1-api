@@ -1,4 +1,4 @@
-global.activeSong = '0.0.6.3';
+global.activeSong = '0.0.1';
 const song = require(`./songs/${global.activeSong}`); // eslint-disable-line
 require('babel-register');
 const express = require('express');
@@ -23,7 +23,7 @@ app.get('*', (req, res) => {
 });
 // The event will be called when a client is connected.
 websocket.on('connection', (socket) => {
-  console.log('connection', socket.id);
+  console.log('mothership connection', socket.id);
   // console.log('A client just joined on', socket.conn.server.transports);
   socket.on('dk', (msg, cb) => {
     // console.log('msg', msg);
@@ -36,6 +36,10 @@ websocket.on('connection', (socket) => {
   socket.on('leap', (msg) => {
     // console.log('leap', msg);
     ctrl.leap.handle(msg);
+  });
+
+  socket.on('coords', (coords) => {
+    websocket.emit('coords', coords);
   });
 
   websocket.emit('totalCounts', song);

@@ -24,6 +24,7 @@ const resetInterval = setInterval(() => {
 const DrumCtrl = {
   handle: (drumObj) => {
     const idx = song[drumObj.d].index;
+    console.log('global.MAX_TIME ', global.MAX_TIME);
     if (global.MAX_TIME < song[drumObj.d].notes[idx].e) fire(song[drumObj.d].notes[idx]);
     else {
       if (song[drumObj.d].index + 1 < song[drumObj.d].notes.length) ++song[drumObj.d].index; // eslint-disable-line
