@@ -1,69 +1,89 @@
-global.activeSong = '0.0.1';
-const song = require(`./songs/${global.activeSong}`); // eslint-disable-line
+global.activeSong = 'mix.0.0.1';
 require('babel-register');
 const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
-const config = require('./config');
-const ctrl = require('./controllers');
+const { port, num_tracks } = require('./config');
+const { fire } = require('./controller');
 const path = require('path');
+const { state, setState } = require('./state');
+const { getRandomExclusive, sleep, assign_socket, init, addStat } = require('./utils');
 
-const app = express();
-const server = http.Server(app);
-const websocket = socketio(server, { transports: ["websocket"] });
+const strap = async () => {
+  // reads ableton and initializes state
+  await init();
 
-global.websocket = websocket;
+  const app = express();
+  const server = http.Server(app);
+  const websocket = socketio(server, { transports: ["websocket"] });
 
-server.listen(config.port, () => config.falcon());
-app.use('/build', express.static('build'));
-app.use('/', express.static('client'));
+  global.websocket = websocket;
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/client/index.html`));
-});
-// The event will be called when a client is connected.
-websocket.on('connection', (socket) => {
-  console.log('mothership connection', socket.id);
-  // console.log('A client just joined on', socket.conn.server.transports);
-  socket.on('dk', (msg, cb) => {
-    // console.log('msg', msg);
-    ctrl.drum.handle(msg);
-    if (typeof cb !== 'function') return;
-    const time = Date.now();
-    cb(null, String(time));
+  server.listen(port, () => console.log('port ', port));
+  app.use('/build', express.static('build'));
+  app.use('/', express.static('client'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(`${__dirname}/client/index.html`));
+  });
+  // The event will be called when a client is connected.
+  websocket.on('connection', async (socket) => {
+    console.log('mothership connection', socket.id);
+
+    if (JSON.stringify(state()) === JSON.stringify({})) {
+      await sleep(2000);
+    }
+    if (!socket.assignment) {
+      // random sleep to increase chance of different tracks
+      const sleep_amount = getRandomExclusive(500, 1000, true);
+      await sleep(sleep_amount)
+      assign_socket(socket);
+    }
+    socket.emit('assignment', state().track_map[socket.assignment])
+
+    // Disconnect this socket on disconnect and free up that track for someone else
+    socket.on('disconnect', err => {
+      const s = state();
+      delete s.assignments[socket.id]
+      for (let key in s.track_map) {
+        if (s.track_map[key].assigned && s.track_map[key].assigned === socket.id) {
+          delete s.track_map[key].assigned
+          break;
+        }
+      }
+      setState(s)
+    })
+
+    socket.on('fire', (payload) => {
+      const { track, clip } = payload
+      addStat(socket.name, track, clip)
+      fire(track, clip)
+    })
+
+    socket.on('name', (payload) => {
+      const { name } = payload
+      console.log(socket.id, ' setting name', name);
+      socket.name = name;
+    })
   });
 
-  socket.on('leap', (msg) => {
-    // console.log('leap', msg);
-    ctrl.leap.handle(msg);
-  });
 
-  socket.on('coords', (coords) => {
-    websocket.emit('coords', coords);
-  });
-
-  websocket.emit('totalCounts', song);
-});
-
-// const dgram = require('dgram');
-// const _udp = dgram.createSocket('udp4');
-//
-// _udp.on('error', (err) => {
-//   console.log(`_udp error:\n${err.stack}`);
-//   _udp.close();
-// });
-//
-// _udp.on('message', (msg, rinfo) => {
-//   ctrl.drum.handle({ d:3 });
-//   const time = String(Date.now());
-//   console.log('udp time ', time - Number(msg));
-//   // console.log(`_udp got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-//
-// });
-//
-// _udp.on('listening', () => {
-//   var address = _udp.address();
-//   console.log(`_udp listening ${address.address}:${address.port}`);
-// });
-//
-// _udp.bind(41234, '192.168.0.3');
+  setInterval(() => {
+    const s = state();
+    // get names:
+    const s_ids = {}
+    for (let id in websocket.sockets.clients().sockets) {
+      s_ids[id] =  websocket.sockets.clients().sockets[id].name || null
+    }
+    const stats = {}
+    const assignments = {};
+    for (let key in s.assignments) {
+      if (s_ids[key]) {
+        assignments[s_ids[key]] = s.assignments[key]
+        if (s.assignments[key] !== -1) assignments[s_ids[key]] = s.track_map[s.assignments[key]]
+      }
+    }
+    websocket.emit('stats', { stats: s.stats, assignments, tracks: s.track_map, num_tracks })
+  }, 1000);
+}
+strap()

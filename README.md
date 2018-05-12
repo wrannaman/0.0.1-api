@@ -1,8 +1,19 @@
+# Songs
+
+1 - 7
+2 - 8 tracks
+
+
+
+# Notes
+// Play the "original" first to get a sense of the pieces to play around with then let them all play it together.
+// less choices, with icons / names for each of the sounds or some icon that looks kind of like it sounds
+
 # Mothership
 
 The goal is to have all communication point to or read from the Mothership
 
-this hid repo fires socket events TO mothership, clients subscribe to mothership events. 
+this hid repo fires socket events TO mothership, clients subscribe to mothership events.
 
 # Docs
 docs https://docs.cycling74.com/max6/dynamic/c74_docs.html#live_object_model

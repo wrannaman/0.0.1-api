@@ -6,8 +6,20 @@ max.observe({
   property: 'current_song_time'
 })
 .on('value', (t) => {
+  // console.log('t is ', t);
   global.MAX_TIME = t;
 });
+
+
+
+max.get({
+  path: 'live_set master_track mixer_device volume',
+  property: 'value'
+})
+.once('value', function(val) {
+  console.log('Master track volume: ' + val);
+});
+
 
 /* Check */
 setTimeout(() => {
