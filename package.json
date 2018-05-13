@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "wrannaman",
   "main": "index.js",
+  "bin": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env BABEL_DISABLE_CACHE=1 NODE_ENV=development nodemon --ignore build/ --ignore client/ index.js --harmony ",
@@ -54,5 +55,12 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.0"
+  },
+  "pkg": {
+    "assets": [
+    ],
+    "targets": [
+      "latest"
+    ]
   }
 }

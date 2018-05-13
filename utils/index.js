@@ -1,7 +1,6 @@
 const { state, setState } = require('../state')
 const { track_name, count_clips_in_track } = require('../controller')
-const { max_clips } = require('../config')
-console.log('MAX_CLIPS', max_clips)
+const { max_clips, num_tracks } = require('../config')
 
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
@@ -17,7 +16,7 @@ module.exports.assign_socket = (socket) => {
   try {
     const s = state();
     let which = -1;
-    const rand = _getRandomExclusive(0, s.tracks.length - 1, true);
+    const rand = _getRandomExclusive(0, num_tracks - 1, true);
     // check for random one first, then sequential
     if (!s.track_map[rand].assigned && s.track_map[rand].count > 0) {
       s.track_map[rand].assigned = socket.id;

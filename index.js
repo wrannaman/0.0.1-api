@@ -28,7 +28,7 @@ const strap = async () => {
   });
   // The event will be called when a client is connected.
   websocket.on('connection', async (socket) => {
-    console.log('mothership connection', socket.id);
+    // console.log('mothership connection', socket.id);
 
     if (JSON.stringify(state()) === JSON.stringify({})) {
       await sleep(2000);
@@ -62,7 +62,6 @@ const strap = async () => {
 
     socket.on('name', (payload) => {
       const { name } = payload
-      console.log(socket.id, ' setting name', name);
       socket.name = name;
     })
   });
