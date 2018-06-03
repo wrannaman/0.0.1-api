@@ -31,6 +31,7 @@ const strap = async () => {
     // console.log('mothership connection', socket.id);
 
     if (JSON.stringify(state()) === JSON.stringify({})) {
+      console.log('sleeping?');
       await sleep(2000);
     }
     if (!socket.assignment) {
@@ -54,6 +55,24 @@ const strap = async () => {
       setState(s)
     })
 
+    socket.on('newAssignment', async () => {
+      // delete the old assignment
+      const s = state();
+      delete s.assignments[socket.id]
+      for (let key in s.track_map) {
+        if (s.track_map[key].assigned && s.track_map[key].assigned === socket.id) {
+          delete s.track_map[key].assigned
+          break;
+        }
+      }
+      setState(s);
+      await sleep(100);
+      console.log('new assignemnt');
+      // random sleep to increase chance of different tracks
+      const sleep_amount = getRandomExclusive(0, 1000, true);
+      await sleep(sleep_amount);
+      assign_socket(socket);
+    })
     socket.on('fire', (payload) => {
       const { track, clip } = payload
       addStat(socket.name, track, clip)
@@ -63,6 +82,24 @@ const strap = async () => {
     socket.on('name', (payload) => {
       const { name } = payload
       socket.name = name;
+    })
+
+    socket.on('join', (room) => {
+      console.log('socket join room ', room);
+      socket.join(room);
+    });
+
+    socket.on('peerToMaster', async (data) => {
+      console.log('peerToMaster', data);
+      websocket.sockets.in(`rtc/master`).emit('requestPeerConnection', data);
+    })
+    socket.on('masterToPeer', (data) => {
+      websocket.sockets.in(`rtc/${data.uuid}`).emit('masterResponse', data);
+
+    })
+    socket.on('frame', (data) => {
+      console.log('got frame');
+      websocket.to('rtc/master').emit('frame', data);
     })
   });
 

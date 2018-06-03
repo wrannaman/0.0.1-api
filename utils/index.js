@@ -9,19 +9,18 @@ const _getRandomExclusive = (min, max, int = false) => {
   const n = Math.random() * (max - min) + min; // eslint-disable-line
   return int ? Math.round(n) : n;
 };
-
-module.exports.getRandomExclusive = _getRandomExclusive;
-module.exports.sleep = t => new Promise((resolve, reject) => setTimeout(() => resolve(), t))
-module.exports.assign_socket = (socket) => {
+const _assign_socket = (socket, attempts = 0) => {
   try {
     const s = state();
     let which = -1;
     const rand = _getRandomExclusive(0, num_tracks - 1, true);
     // check for random one first, then sequential
     if (!s.track_map[rand].assigned && s.track_map[rand].count > 0) {
+      console.log('rand worked');
       s.track_map[rand].assigned = socket.id;
       which = Number(rand);
     } else {
+      console.log('rand didnt work');
       // rand didnt work, just do a sequential one
       for (let key in s.track_map) {
         if (!s.track_map[key].assigned && s.track_map[key].count > 0) {
@@ -38,6 +37,9 @@ module.exports.assign_socket = (socket) => {
     console.log('error is e ', e);
   }
 }
+module.exports.getRandomExclusive = _getRandomExclusive;
+module.exports.sleep = t => new Promise((resolve, reject) => setTimeout(() => resolve(), t))
+module.exports.assign_socket = _assign_socket
 module.exports.init = async () => {
   let tracks = Array.from(Array(max_clips).keys()).map(i => i);
   const tmp = [];
