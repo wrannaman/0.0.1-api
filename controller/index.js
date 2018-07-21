@@ -12,7 +12,12 @@ const fire = (track, clip) => {
   const s = state()
   if (clip === STOP) return stop_all_clips(track)
   fire_clip(track, clip)
-  // // Delicious fires only once
+  // Delicious fires only once
+  if (track === 5) {
+    setTimeout(( ) => {
+      stop_all_clips(track);
+    }, 2000);
+  }
   // if (s.track_map[track].name === 'Delicious') {
   //   setTimeout(( ) => {
   //     stop_all_clips(track)

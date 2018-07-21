@@ -12,3 +12,7 @@ module.exports.setState = (k, v) => {
     state[k] = v;
   }
 };
+module.exports.getState = (k) => {
+  const s = Object.assign({}, state); // copy
+  return s[k];
+};

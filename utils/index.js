@@ -15,12 +15,12 @@ const _assign_socket = (socket, attempts = 0) => {
     let which = -1;
     const rand = _getRandomExclusive(0, num_tracks - 1, true);
     // check for random one first, then sequential
-    if (!s.track_map[rand].assigned && s.track_map[rand].count > 0) {
-      console.log('rand worked');
-      s.track_map[rand].assigned = socket.id;
-      which = Number(rand);
-    } else {
-      console.log('rand didnt work');
+    // if (!s.track_map[rand].assigned && s.track_map[rand].count > 0) {
+    //   console.log('rand worked');
+    //   s.track_map[rand].assigned = socket.id;
+    //   which = Number(rand);
+    // } else {
+      // console.log('rand didnt work');
       // rand didnt work, just do a sequential one
       for (let key in s.track_map) {
         if (!s.track_map[key].assigned && s.track_map[key].count > 0) {
@@ -29,7 +29,7 @@ const _assign_socket = (socket, attempts = 0) => {
           break;
         }
       }
-    }
+    // }
     socket.assignment = which; // eslint-disable-line
     s.assignments[socket.id] = which;
     setState(s)

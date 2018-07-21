@@ -4,9 +4,9 @@ const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
 const { port, num_tracks } = require('./config');
-const { fire } = require('./controller');
+const { fire, stop_all_clips } = require('./controller');
 const path = require('path');
-const { state, setState } = require('./state');
+const { state, setState, getState } = require('./state');
 const { getRandomExclusive, sleep, assign_socket, init, addStat } = require('./utils');
 
 const strap = async () => {
@@ -28,7 +28,7 @@ const strap = async () => {
   });
   // The event will be called when a client is connected.
   websocket.on('connection', async (socket) => {
-    // console.log('mothership connection', socket.id);
+    console.log('mothership connection', socket.id);
 
     if (JSON.stringify(state()) === JSON.stringify({})) {
       console.log('sleeping?');
@@ -37,23 +37,23 @@ const strap = async () => {
     if (!socket.assignment) {
       // random sleep to increase chance of different tracks
       const sleep_amount = getRandomExclusive(500, 1000, true);
-      await sleep(sleep_amount)
+      await sleep(sleep_amount);
       assign_socket(socket);
     }
-    socket.emit('assignment', state().track_map[socket.assignment])
+    socket.emit('assignment', state().track_map[socket.assignment]);
 
     // Disconnect this socket on disconnect and free up that track for someone else
     socket.on('disconnect', err => {
       const s = state();
-      delete s.assignments[socket.id]
+      delete s.assignments[socket.id];
       for (let key in s.track_map) {
         if (s.track_map[key].assigned && s.track_map[key].assigned === socket.id) {
-          delete s.track_map[key].assigned
+          delete s.track_map[key].assigned;
           break;
         }
       }
-      setState(s)
-    })
+      setState(s);
+    });
 
     socket.on('newAssignment', async () => {
       // delete the old assignment
@@ -73,6 +73,23 @@ const strap = async () => {
       await sleep(sleep_amount);
       assign_socket(socket);
     })
+
+    socket.on('picap', (payload) => {
+      const { index } = payload;
+      let current = getState(index);
+      if (!current) current = { state: false, update: 0 };
+      // flip it
+      const diff = Date.now() - current.update;
+      if (diff < 100) return;
+      current.state = !current.state;
+      console.log('=================');
+      console.log('setting track ', index, ' to state: ', current.state ? 'on' : 'off', 'diff ', diff);
+      current.update = Date.now()
+      setState(index, current);
+      if (current.state) fire(index, 0);
+      else stop_all_clips(index);
+    })
+
     socket.on('fire', (payload) => {
       const { track, clip } = payload
       addStat(socket.name, track, clip)
